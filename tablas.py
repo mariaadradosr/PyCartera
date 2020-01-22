@@ -46,3 +46,6 @@ alta_fam_cif = functions.altas_cif(altas,'Family').pivot_table('cif','Family',['
 #Tabla ALTAS - CLIENTE
 
 alta_cif =  functions.altas_cif(altas,'Total').T
+
+
+###### BAJAS MENSUALES

@@ -183,3 +183,43 @@ def altas_bajas_mes_canal(altas_bajas_df):
     mes_canal.reset_index(inplace=True)
     return mes_canal
 
+def purchase(row):
+    return row['purchase_migration'] if row['migrado'] == '1' else row['purchase_date']
+
+
+def purchaseToAsset(row):
+    return 0 if row['rfb__c'] is pd.NaT else 1
+
+
+
+def ventas_2(cur):
+    cur.execute('''
+            select segmento, assetid, cif, canal_venta, product_name, 
+                    migrado,rfb_date, rfb_migration, deactivation_date,
+                    purchase_date, purchase_migration, deactivation_request_date
+            from cartera_xbo
+            where process_date = (
+            select max(process_date) from cartera_xbo)
+            and segmento in ('3-NOTRIAL')
+            and upper(product_name) not like '%CENTRALITA%'
+            ''')
+    df = pd.DataFrame(cur.fetchall())
+    col_names = []
+    for e in range(len(cur.description)):
+        col_names.append(cur.description[e][0])
+    df.rename(columns = dict(zip(list(range(33)), col_names)), inplace = True)
+    df['rfb__c'] = df.apply(lambda row: rfb(row), axis = 1)
+    df.drop(columns=['rfb_date','rfb_migration'], axis=1, inplace=True)
+    df['purchase_date__c'] = df.apply(lambda row: purchase(row), axis = 1)
+    df.drop(columns=['purchase_migration','purchase_date'], axis=1, inplace=True)
+    df['Family'] = df.product_name.apply(lambda x: getFamilyFrom(x))
+    df['Velocity'] = df.product_name.apply(lambda x: getVelocityFrom(x))
+    df['isNeba'] = df.product_name.apply(lambda x: isNeba(x))
+    df['isSold'] = 1
+    df['isAsset'] =  df.apply(lambda row: purchaseToAsset(row), axis = 1)
+    df['isBaja'] = df.apply(lambda row: baja__c(row), axis = 1)
+    df['isActive'] = df['isAsset'] + df['isBaja']
+    to_drop = df[(df['rfb__c'].isnull())&((df['deactivation_date'].notnull())|(df['deactivation_request_date'].notnull()))].index
+    df.drop(to_drop , inplace=True)
+    df.drop(columns=['deactivation_request_date'], axis=1, inplace=True)
+    return df
