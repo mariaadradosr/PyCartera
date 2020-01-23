@@ -221,14 +221,6 @@ def altas_bajas_mes_canal(altas_bajas_df):
     mes_canal.reset_index(inplace=True)
     return mes_canal
 
-def purchase(row):
-    return row['purchase_migration'] if row['migrado'] == '1' else row['purchase_date']
-
-
-def purchaseToAsset(row):
-    return 0 if row['rfb__c'] is pd.NaT else 1
-
-
 
 def ventas_2(cur):
     cur.execute('''
