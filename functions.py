@@ -21,29 +21,47 @@ def connectToPs():
 
 def getFamilyFrom(description):
     if re.search('MUSIC', description.upper()):
-        return 'X Music'
+        return 'X MUSIC'
     elif re.search('PRIVACY', description.upper()):
-        return 'X Privacy'
+        return 'X PRIVACY'
     elif re.search('PROTECTION', description.upper()):
-        return 'X Protection'
+        return 'X PROTECTION'
     elif re.search('FIBER', description.upper()):
-        return 'X Fiber'
+        return 'X FIBER'
     elif re.search('SECURITY', description.upper()):
-        return 'X Security'
+        return 'X SECURITY'
     elif re.search('UCOM', description.upper()):
-        return 'X UCom'
+        return 'X UCOM'
+    elif re.search('MOBILE', description.upper()):
+        return 'X MOBILE'
 
 def getVelocityFrom(description):
     if re.findall('[0-9]{3}|[0-9]{2}', description):
-        return re.findall('[0-9]{3}|[0-9]{2}', description)[0]+' Mbps'
+        return re.findall('[0-9]{3}|[0-9]{2}', description)[0]
+        # return re.findall('[0-9]{3}|[0-9]{2}', description)[0]+' Mbps'
     else:
         return ''
 
 def isNeba(description):
-    if re.search('NEBA', description.upper()):
+    if re.search('FIBER', description.upper()) and (re.search('NEBA', description.upper()) or re.search('IP', description.upper())) :
         return 1
     else:
         return 0
+
+def getProductName(row):
+    if row['Velocity'] != '' and row['isNeba'] == 0 and row['Family'] != 'X FIBER':
+        return row['Family'].title()+' '+row['Velocity']
+    if row['Velocity'] != '' and row['isNeba'] == 0 and row['Family'] == 'X FIBER':
+        return row['Family'].title()+' '+row['Velocity']+' - '+'own'
+    if row['isNeba'] == 1:
+        return row['Family'].title()+' '+row['Velocity']+' - '+'neba'
+    if row['Family'] == 'X UCOM':
+        return 'Teamwork+PBX'
+    if row['Family'] == 'X MOBILE':
+        return row['product_name'].title()
+    else:
+        return 'Assets'
+
 
 def ventas(cur):
     cur.execute('''
