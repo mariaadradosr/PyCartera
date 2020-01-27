@@ -4,11 +4,14 @@ import dotenv
 import os
 import psycopg2 as ps
 import numpy as np
+import datetime
 
 dotenv.load_dotenv()
 
 # Mirar si es necesario cerrar la conexion a PS (el cursor)
-
+def getTimeline(df):
+    return [date.strftime('%m-%Y') for date in pd.date_range(df.purchase_date__c.min(), df.purchase_date__c.max()+ datetime.timedelta(days=30), freq='M')] 
+    
 def connectToPs():
     host=os.getenv('HOSTNAME')
     database=os.getenv('NAME')
@@ -353,7 +356,7 @@ def ass_altas_bajas_fam_mes(df, nivel ='fam',canal = 0):
 
 # -------------- MIGRAS --------------
 
-def migOut(cur):
+def migBase(cur):
     cur.execute('''
             select segmento, assetid, product_name,assethijo_mig, cif, canal_venta,deactivation_date,
             date_migration
@@ -377,8 +380,9 @@ def migOut(cur):
     df['product_name'] = df.apply(lambda row: getProductName(row), axis = 1)
     df['tipo_migra'] = df.segmento.apply(lambda x: 'IN' if x == '3-NOTRIAL' else 'OUT')
     df['date_migration'] = df.apply(lambda row: getMigrationDate(row), axis=1 )
+    df['month_year']= df.date_migration.apply(lambda x: x.strftime('%m-%Y'))
     cols = ['assetid','assethijo_mig','product_name', 'Family' ,'cif', 'canal_venta',
-            'date_migration','tipo_migra']
+            'date_migration','tipo_migra','month_year']
     df = df[cols]
-    df.rename(columns={'date_migration':'mig_in_date'}, inplace = True)
+    df.rename(columns={'date_migration':'mig_date'}, inplace = True)
     return df
