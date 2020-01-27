@@ -92,7 +92,10 @@ def cancelledSales(row):
 def deactivation(row):
     return pd.NaT if row['isActive'] >= 1 else row['deactivation_date']
 
-# Correcciones manuales 
+def getMigrationDate(row):
+    return row['date_migration'] if row['tipo_migra'] == 'IN' else row['deactivation_date']
+
+# Correcciones manuales -------------------
 
 def DRDcorrecciones(row):
     return pd.NaT if row['assetid'] in ['02i0N00000KqDCzQAN','02i0N00000I2qZ2QAJ','02i0N00000I2qZ3QAJ'] else row['deactivation_request_date']
@@ -155,7 +158,7 @@ def base(cur):
     cur.execute('''
             select segmento, assetid, cif, canal_venta, product_name, 
                     migrado,rfb_date, rfb_migration, deactivation_date, cancellation_date,
-                    purchase_date, purchase_migration, deactivation_request_date
+                    purchase_date, purchase_migration, deactivation_request_date, date_migration
             from cartera_xbo
             where process_date = (
             select max(process_date) from cartera_xbo)
@@ -187,7 +190,13 @@ def base(cur):
     df['isCancelled'] = df.apply(lambda row: cancelledSales(row), axis = 1)
     # to_drop = df[(df['rfb__c'].isnull())&((df['deactivation_date'].notnull())|(df['deactivation_request_date'].notnull()))].index
     # df.drop(to_drop , inplace=True)
-    df.drop(columns=['deactivation_request_date'], axis=1, inplace=True)
+    # df.drop(columns=['deactivation_request_date'], axis=1, inplace=True)
+    cols = ['assetid', 'product_name', 'Family' ,'cif', 'canal_venta',
+            'purchase_date__c','cancellation_date','rfb__c', 'deactivation_date',
+            'date_migration','migrado', 
+            'isSold', 'isCancelled','isAsset', 'isActive','isBaja']
+    df = df[cols]
+    df.rename(columns={'date_migration':'mig_in_date'}, inplace = True)
     return df
 
 # -------------- VENTAS --------------
@@ -340,3 +349,36 @@ def ass_altas_bajas_fam_mes(df, nivel ='fam',canal = 0):
             isBaja.reset_index(inplace=True)
             pivot_isBaja = isBaja.pivot_table(index =['Family','product_name'],columns=['year','month'], values='isBaja',fill_value=0,margins=True,aggfunc=sum).astype('int64')
             return pivot_isAsset, pivot_isBaja
+
+
+# -------------- MIGRAS --------------
+
+def migOut(cur):
+    cur.execute('''
+            select segmento, assetid, product_name,assethijo_mig, cif, canal_venta,deactivation_date,
+            date_migration
+            from cartera_xbo
+            where process_date = (
+            select max(process_date) from cartera_xbo)
+            and segmento in ('4-MIGRADO','3-NOTRIAL')
+            and migrado = '1'
+            and upper(product_name) not like '%CENTRALITA%'
+            ''')
+    df = pd.DataFrame(cur.fetchall())
+    col_names = []
+    for e in range(len(cur.description)):
+        col_names.append(cur.description[e][0])
+    df.rename(columns = dict(zip(list(range(33)), col_names)), inplace = True)
+    df['canal_venta'] = df.apply(lambda row: CanalCorrecciones(row), axis =1)
+    df['canal_venta'] = df.canal_venta.apply(lambda x: canal(x))
+    df['Family'] = df.product_name.apply(lambda x: getFamilyFrom(x))
+    df['Velocity'] = df.product_name.apply(lambda x: getVelocityFrom(x))
+    df['isNeba'] = df.product_name.apply(lambda x: isNeba(x))
+    df['product_name'] = df.apply(lambda row: getProductName(row), axis = 1)
+    df['tipo_migra'] = df.segmento.apply(lambda x: 'IN' if x == '3-NOTRIAL' else 'OUT')
+    df['date_migration'] = df.apply(lambda row: getMigrationDate(row), axis=1 )
+    cols = ['assetid','assethijo_mig','product_name', 'Family' ,'cif', 'canal_venta',
+            'date_migration','tipo_migra']
+    df = df[cols]
+    df.rename(columns={'date_migration':'mig_in_date'}, inplace = True)
+    return df
