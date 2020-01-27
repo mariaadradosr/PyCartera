@@ -92,6 +92,24 @@ def cancelledSales(row):
 def deactivation(row):
     return pd.NaT if row['isActive'] >= 1 else row['deactivation_date']
 
+# Correcciones manuales 
+
+def DRDcorrecciones(row):
+    return pd.NaT if row['assetid'] in ['02i0N00000KqDCzQAN','02i0N00000I2qZ2QAJ','02i0N00000I2qZ3QAJ'] else row['deactivation_request_date']
+
+def DDcorrecciones(row):
+    # return pd.NaT if row['assetid'] in ['02i0N00000L2rIBQAZ','02i0N00000L2rICQAZ','02i0N00000LGrVPQA1','02i0N00000LGrVQQA1'] else row['deactivation_date']
+    if row['assetid'] in ['02i0N00000KqDCzQAN','02i0N00000L2rIBQAZ','02i0N00000L2rICQAZ','02i0N00000LGrVPQA1','02i0N00000LGrVQQA1','02i0N00000LJWycQAH','02i0N00000HfjEZQAZ','02i0N00000HfjEYQAZ']:
+        return pd.NaT
+    else:
+        return row['deactivation_date']
+
+def CDcorrecciones(row):
+    return row['deactivation_date'] if row['assetid'] in ['02i0N00000KqDCzQAN','02i0N00000LJWycQAH','02i0N00000HfjEZQAZ','02i0N00000HfjEYQAZ'] else row['cancellation_date']
+
+
+def CanalCorrecciones(row):
+    return 'DHO' if row['cif'] == 'P1817800D' else row['canal_venta']
 
 # ----------------------------------- DETALLE --------------------------------
 
@@ -111,6 +129,7 @@ def detalle(cur):
     for e in range(len(cur.description)):
         col_names.append(cur.description[e][0])
     df.rename(columns = dict(zip(list(range(33)), col_names)), inplace = True)
+    df['canal_venta'] = df.apply(lambda row: CanalCorrecciones(row), axis =1)
     df['Family'] = df.product_name.apply(lambda x: getFamilyFrom(x))
     df['Velocity'] = df.product_name.apply(lambda x: getVelocityFrom(x))
     df['isNeba'] = df.product_name.apply(lambda x: isNeba(x))
@@ -148,6 +167,10 @@ def base(cur):
     for e in range(len(cur.description)):
         col_names.append(cur.description[e][0])
     df.rename(columns = dict(zip(list(range(33)), col_names)), inplace = True)
+    df['cancellation_date'] = df.apply(lambda row: CDcorrecciones(row), axis = 1)
+    df['deactivation_request_date'] = df.apply(lambda row: DRDcorrecciones(row), axis = 1)
+    df['deactivation_date'] = df.apply(lambda row: DDcorrecciones(row), axis = 1)
+    df['canal_venta'] = df.apply(lambda row: CanalCorrecciones(row), axis =1)
     df['canal_venta'] = df.canal_venta.apply(lambda x: canal(x))
     df['rfb__c'] = df.apply(lambda row: rfb(row), axis = 1)
     df.drop(columns=['rfb_date','rfb_migration'], axis=1, inplace=True)
@@ -162,8 +185,8 @@ def base(cur):
     df['isBaja'] = df.apply(lambda row: baja__c(row), axis = 1)
     df['isActive'] = df['isAsset'] - df['isBaja']
     df['isCancelled'] = df.apply(lambda row: cancelledSales(row), axis = 1)
-    to_drop = df[(df['rfb__c'].isnull())&((df['deactivation_date'].notnull())|(df['deactivation_request_date'].notnull()))].index
-    df.drop(to_drop , inplace=True)
+    # to_drop = df[(df['rfb__c'].isnull())&((df['deactivation_date'].notnull())|(df['deactivation_request_date'].notnull()))].index
+    # df.drop(to_drop , inplace=True)
     df.drop(columns=['deactivation_request_date'], axis=1, inplace=True)
     return df
 
