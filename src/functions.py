@@ -18,6 +18,11 @@ def connectToPs():
     conn = ps.connect(host=host, database=database, user=user, password=password)
     print(conn)
     return conn.cursor()
+    
+def getProcessDate(cur):
+    cur.execute(''' select max(process_date) from cartera_xbo''')
+    return pd.DataFrame(cur.fetchall()).iloc[0][0]
+
 
 def getFamilyFrom(description):
     if re.search('MUSIC', description.upper()):
