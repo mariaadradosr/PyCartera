@@ -61,7 +61,9 @@ def isMonosede(description):
         return 0
 
 def getProductName(row):
-    if row['isMonosede'] ==1:
+    if row['Family'] == 'X MUSIC':
+        return 'X Music'
+    elif row['isMonosede'] ==1:
         return row['Family'].title()+' '+'Monosede '+row['Velocity']
     elif row['Velocity'] != '' and row['isNeba'] == 0 and row['Family'] != 'X FIBER':
         return row['Family'].title()+' '+row['Velocity']
@@ -74,7 +76,7 @@ def getProductName(row):
     elif row['Family'] == 'X MOBILE':
         return row['product_name'].title()
     else:
-        return 'Assets'
+        return row['Family'].title()
 
 
 def canal(canal_venta):
@@ -408,7 +410,7 @@ def cli_altas_mes(df,tipo=3):
         # return pivot
 
 def cli_bajas_mes(df,tipo=3):
-    df2 = df[df['cif']==1]
+    df2 = df[df['isBaja']==1]
     idx = pd.period_range('2018-10-01',df2.purchase_date__c.max(),freq='M')
     # if tipo == 0:
     #     data = df2[['cif']].groupby(by=[df2.deactivation_date.dt.to_period("M")]).nunique()
