@@ -203,53 +203,96 @@ def base(cur):
 
 # VENTA ASSETS
 
-def ass_vta_fam_mes(df,canal=0):
+def ass_vta_mes(df,tipo=0):
     idx = pd.period_range('2018-10-01',df.purchase_date__c.max(),freq='M')
-    if canal == 1:
-        ass_vta_canal_fam_mes = df[['isSold']].groupby(by=[df.purchase_date__c.dt.to_period("M"),df.canal_venta,df.Family]).sum()
-        ass_vta_canal_fam_mes.reset_index(inplace=True)
-        ass_vta_canal_fam_mes.set_index('purchase_date__c', inplace=True)
-        return ass_vta_canal_fam_mes.pivot_table(index='purchase_date__c', columns=['canal_venta','Family'], values='isSold',fill_value=0).T
-    elif canal == 0:
-        ass_vta_fam_mes = df[['isSold']].groupby(by=[df.purchase_date__c.dt.to_period("M"),df.Family]).sum()
-        ass_vta_fam_mes.reset_index(inplace=True)
-        ass_vta_fam_mes.set_index('purchase_date__c', inplace=True)
-        return ass_vta_fam_mes.pivot_table(index='purchase_date__c', columns='Family', values='isSold',fill_value=0).T
-    elif canal == 2:
-        ass_vta_fam_mes = df[['isSold']].groupby(by=[df.purchase_date__c.dt.to_period("M")]).sum()
-        ass_vta_fam_mes.reset_index(inplace=True)
-        ass_vta_fam_mes.set_index('purchase_date__c', inplace=True)
-        return ass_vta_fam_mes.T     
-
-def ass_vta_prod_mes(df,canal=0):
-    if canal == 1:
-        ass_vta_canal_prod_mes = df[['isSold']].groupby(by=[df.purchase_date__c.dt.year,df.purchase_date__c.dt.month,df.canal_venta,df.Family,df.product_name]).sum()
-        ass_vta_canal_prod_mes.index.names = ['purchase_year', 'purchase_month','canal_venta','Family','product_name']
-        ass_vta_canal_prod_mes.reset_index(inplace=True)
-        return ass_vta_canal_prod_mes.pivot_table('isSold',['canal_venta','Family','product_name'],['purchase_year','purchase_month'],fill_value=0,margins=True,aggfunc=sum)
-    elif canal == 0:
-        ass_vta_canal_prod_mes = df[['isSold']].groupby(by=[df.purchase_date__c.dt.year,df.purchase_date__c.dt.month,df.Family,df.product_name]).sum()
-        ass_vta_canal_prod_mes.index.names = ['purchase_year', 'purchase_month','Family','product_name']
-        ass_vta_canal_prod_mes.reset_index(inplace=True)
-        return ass_vta_canal_prod_mes.pivot_table('isSold',['Family','product_name'],['purchase_year','purchase_month'],fill_value=0,margins=True,aggfunc=sum)
-    else:
-        print('Canal: 0 or 1')
+    if tipo == 0:
+        data = df[['isSold']].groupby(by=[df.purchase_date__c.dt.to_period("M")]).sum()
+        data.reset_index(inplace=True)
+        data.set_index('purchase_date__c', inplace=True)
+        pivot = data.reindex(idx).fillna(0).T
+        return pivot
+    elif tipo == 1:
+        data = df[['isSold']].groupby(by=[df.purchase_date__c.dt.to_period("M"),df.Family]).sum()
+        data.reset_index(inplace=True)
+        data.set_index('purchase_date__c', inplace=True)
+        pivot =  data.pivot_table(index='purchase_date__c', columns='Family', values='isSold',fill_value=0)
+        pivot = pivot.reindex(idx).fillna(0).T
+        return pivot
+    elif tipo == 2:
+        data = df[['isSold']].groupby(by=[df.purchase_date__c.dt.to_period("M"),df.canal_venta]).sum()
+        data.reset_index(inplace=True)
+        data.set_index('purchase_date__c', inplace=True)
+        pivot = data.pivot_table(index='purchase_date__c', columns='canal_venta', values='isSold',fill_value=0)
+        pivot = pivot.reindex(idx).fillna(0).T
+        return pivot
+    elif tipo == 3:
+        data = df[['isSold']].groupby(by=[df.purchase_date__c.dt.to_period("M"),df.canal_venta,df.Family]).sum()
+        data.reset_index(inplace=True)
+        data.set_index('purchase_date__c', inplace=True)
+        pivot = data.pivot_table(index='purchase_date__c', columns=['canal_venta','Family'], values='isSold',fill_value=0)
+        pivot = pivot.reindex(idx).fillna(0).T
+        return pivot
+    elif tipo == 4:
+        data = df[['isSold']].groupby(by=[df.purchase_date__c.dt.to_period("M"),df.Family,df.product_name]).sum()
+        data.reset_index(inplace=True)
+        data.set_index('purchase_date__c', inplace=True)
+        pivot = data.pivot_table(index='purchase_date__c', columns=['Family','product_name'], values='isSold',fill_value=0)
+        pivot = pivot.reindex(idx).fillna(0).T
+        return pivot
+    elif tipo == 5:
+        data = df[['isSold']].groupby(by=[df.purchase_date__c.dt.to_period("M"),df.canal_venta,df.Family,df.product_name]).sum()
+        data.reset_index(inplace=True)
+        data.set_index('purchase_date__c', inplace=True)
+        pivot = data.pivot_table(index='purchase_date__c', columns=['canal_venta','Family','product_name'], values='isSold',fill_value=0)
+        pivot = pivot.reindex(idx).fillna(0).T
+        return pivot
+ 
         
 # VENTAS CLIENTES
 
-def cli_vta_fam_mes(df,canal=0):
-    if canal == 0:
-        cli_vta_canal_mes = df[['cif']].groupby(by=[df.purchase_date__c.dt.year,df.purchase_date__c.dt.month,df.canal_venta]).nunique()
-        cli_vta_canal_mes.index.names = ['purchase_year', 'purchase_month', 'canal_venta']
-        cli_vta_canal_mes.reset_index(inplace=True)
-        return cli_vta_canal_mes.pivot_table('cif',['canal_venta'],['purchase_year','purchase_month'],fill_value=0,margins=True,aggfunc=sum)
-    elif canal == 1:
-        cli_vta_canal_fam_mes = df[['cif']].groupby(by=[df.purchase_date__c.dt.year,df.purchase_date__c.dt.month,df.canal_venta,df.Family]).nunique()
-        cli_vta_canal_fam_mes.index.names = ['purchase_year', 'purchase_month', 'canal_venta','Family']
-        cli_vta_canal_fam_mes.reset_index(inplace=True)
-        return cli_vta_canal_fam_mes.pivot_table('cif',['canal_venta','Family'],['purchase_year','purchase_month'],fill_value=0)
-    else:
-        print('Canal: 0 or 1')
+def cli_vta_mes(df,tipo=0):
+    idx = pd.period_range('2018-10-01',df.purchase_date__c.max(),freq='M')
+    if tipo == 0:
+        data = df[['cif']].groupby(by=[df.purchase_date__c.dt.to_period("M")]).nunique()
+        data.reset_index(inplace=True)
+        data.set_index('purchase_date__c', inplace=True)
+        pivot = data.reindex(idx).fillna(0).T
+        return pivot
+    elif tipo == 1:
+        data = df[['cif']].groupby(by=[df.purchase_date__c.dt.to_period("M"),df.Family]).nunique()
+        data.reset_index(inplace=True)
+        data.set_index('purchase_date__c', inplace=True)
+        pivot =  data.pivot_table(index='purchase_date__c', columns='Family', values='cif',fill_value=0)
+        pivot = pivot.reindex(idx).fillna(0).T
+        return pivot
+    elif tipo == 2:
+        data = df[['cif']].groupby(by=[df.purchase_date__c.dt.to_period("M"),df.canal_venta]).nunique()
+        data.reset_index(inplace=True)
+        data.set_index('purchase_date__c', inplace=True)
+        pivot = data.pivot_table(index='purchase_date__c', columns='canal_venta', values='cif',fill_value=0)
+        pivot = pivot.reindex(idx).fillna(0).T
+        return pivot
+    elif tipo == 3:
+        data = df[['cif']].groupby(by=[df.purchase_date__c.dt.to_period("M"),df.canal_venta,df.Family]).nunique()
+        data.reset_index(inplace=True)
+        data.set_index('purchase_date__c', inplace=True)
+        pivot = data.pivot_table(index='purchase_date__c', columns=['canal_venta','Family'], values='cif',fill_value=0)
+        pivot = pivot.reindex(idx).fillna(0).T
+        return pivot
+    elif tipo == 4:
+        data = df[['cif']].groupby(by=[df.purchase_date__c.dt.to_period("M"),df.Family,df.product_name]).nunique()
+        data.reset_index(inplace=True)
+        data.set_index('purchase_date__c', inplace=True)
+        pivot = data.pivot_table(index='purchase_date__c', columns=['Family','product_name'], values='cif',fill_value=0)
+        pivot = pivot.reindex(idx).fillna(0).T
+        return pivot
+    elif tipo == 5:
+        data = df[['cif']].groupby(by=[df.purchase_date__c.dt.to_period("M"),df.canal_venta,df.Family,df.product_name]).nunique()
+        data.reset_index(inplace=True)
+        data.set_index('purchase_date__c', inplace=True)
+        pivot = data.pivot_table(index='purchase_date__c', columns=['canal_venta','Family','product_name'], values='cif',fill_value=0)
+        pivot = pivot.reindex(idx).fillna(0).T
+        return pivot
 
 # -------------- ALTAS & BAJAS --------------
 
@@ -274,86 +317,124 @@ def base_altas(df):
 
 # ALTAS/BAJAS CLIENTES
 
-def cli_altas_bajas_mes(df_altas,canal=0):
-    if canal == 0:
-        altas = df_altas[['isClient']].groupby(by=[df_altas.rfb]).sum()
-        bajas = df_altas[['isBaja']].groupby(by=[df_altas.deactivation_date]).sum()
-        bajas.index.name = 'rfb'
-        altas_bajas = altas.join(bajas, how='outer').fillna(0)
-        mes = altas_bajas.groupby(by=[altas_bajas.index.year, altas_bajas.index.month]).sum()
-        mes.index.names = ['year', 'month']
-        return mes.T.astype('int64')
-    elif canal == 1:
-        altas = df_altas[['isClient']].groupby(by=[df_altas.rfb,df_altas.canal_venta]).sum()
-        bajas = df_altas[['isBaja']].groupby(by=[df_altas.deactivation_date, df_altas.canal_venta]).sum()
-        bajas.index.names = ['rfb','canal_venta']
-        altas_bajas = altas.join(bajas, how='outer').fillna(0)
-        mes = altas_bajas.groupby(by=[altas_bajas.index.get_level_values('rfb').year, altas_bajas.index.get_level_values('rfb').month, altas_bajas.index.get_level_values('canal_venta')]).sum()
-        mes.index.names = ['year', 'month', 'canal']
-#         mes.reorder_levels([1,0], axis=0)
-        return mes.unstack().T.fillna(0).astype('int64')
+def cli_altas_mes(df_altas,tipo=0):
+    idx = pd.period_range('2018-10-01',df_altas.rfb.max(),freq='M')
+    if tipo == 0:
+        data = df_altas[['isClient']].groupby(by=[df_altas.rfb.dt.to_period("M")]).sum()
+        data.reset_index(inplace=True)
+        data.set_index('rfb', inplace=True)
+        pivot = data.reindex(idx).fillna(0).T
+        return pivot
+    if tipo == 1:
+        data = df_altas[['isClient']].groupby(by=[df_altas.rfb.dt.to_period("M"),df_altas.canal_venta]).sum()
+        data.reset_index(inplace=True)
+        pivot =  data.pivot_table(index='rfb', columns='canal_venta', values='isClient',fill_value=0)
+        pivot = pivot.reindex(idx).fillna(0).T
+        return pivot
+def cli_bajas_mes(df_altas,tipo=0):
+    idx = pd.period_range('2018-10-01',df_altas.rfb.max(),freq='M')
+    if tipo == 0:
+        data = df_altas[['isBaja']].groupby(by=[df_altas.deactivation_date.dt.to_period("M")]).sum()
+        data.reset_index(inplace=True)
+        data.set_index('deactivation_date', inplace=True)
+        pivot = data.reindex(idx).fillna(0).T.astype('int64')
+        return pivot
+    if tipo == 1:
+        data = df_altas[['isBaja']].groupby(by=[df_altas.deactivation_date.dt.to_period("M"),df_altas.canal_venta]).sum()
+        data.reset_index(inplace=True)
+        pivot = data.pivot_table(index='deactivation_date', columns='canal_venta', values='isBaja',fill_value=0)
+        pivot = pivot.reindex(idx).fillna(0).T.astype('int64')
+        return pivot
 
 # ALTAS/BAJAS PRODUCTO
 
-def ass_altas_bajas_fam_mes(df, nivel ='fam',canal = 0):
-    if nivel.upper() == 'FAM':
-        if canal == 1:
-            ass_alta_canal_prod_mes = df[['isAsset']].groupby(by=[df.rfb__c,df.canal_venta,df.Family,df.product_name]).sum()
-            ass_baja_canal_prod_mes = df[['isBaja']].groupby(by=[df.deactivation_date,df.canal_venta,df.Family,df.product_name]).sum()
-            ass_baja_canal_prod_mes.index.names =  ['rfb__c','canal_venta','Family','product_name']
-            altas_bajas = ass_alta_canal_prod_mes.join(ass_baja_canal_prod_mes, how='outer').fillna(0)
-            mes = altas_bajas.groupby(by=[altas_bajas.index.get_level_values('rfb__c').year, altas_bajas.index.get_level_values('rfb__c').month, altas_bajas.index.get_level_values('canal_venta'),altas_bajas.index.get_level_values('Family')]).sum()
-            mes.index.names = ['year', 'month', 'canal_venta', 'Family']
-            isAsset = mes[['isAsset']]
-            isAsset.reset_index(inplace=True)
-            pivot_isAsset = isAsset.pivot_table(index = ['canal_venta','Family'],columns=['year','month'], values='isAsset',fill_value=0,margins=True,aggfunc=sum).astype('int64')
-            isBaja = mes[['isBaja']]
-            isBaja.reset_index(inplace=True)
-            pivot_isBaja = isBaja.pivot_table(index = ['canal_venta','Family'],columns=['year','month'], values='isBaja',fill_value=0,margins=True,aggfunc=sum).astype('int64')
-            return pivot_isAsset, pivot_isBaja
-        elif canal == 0:
-            ass_alta_canal_prod_mes = df[['isAsset']].groupby(by=[df.rfb__c,df.Family,df.product_name]).sum()
-            ass_baja_canal_prod_mes = df[['isBaja']].groupby(by=[df.deactivation_date,df.Family,df.product_name]).sum()
-            ass_baja_canal_prod_mes.index.names =  ['rfb__c','Family','product_name']
-            altas_bajas = ass_alta_canal_prod_mes.join(ass_baja_canal_prod_mes, how='outer').fillna(0)
-            mes = altas_bajas.groupby(by=[altas_bajas.index.get_level_values('rfb__c').year, altas_bajas.index.get_level_values('rfb__c').month,altas_bajas.index.get_level_values('Family')]).sum()
-            mes.index.names = ['year', 'month', 'Family']
-            isAsset = mes[['isAsset']]
-            isAsset.reset_index(inplace=True)
-            pivot_isAsset = isAsset.pivot_table(index ='Family',columns=['year','month'], values='isAsset',fill_value=0,margins=True,aggfunc=sum).astype('int64')
-            isBaja = mes[['isBaja']]
-            isBaja.reset_index(inplace=True)
-            pivot_isBaja = isBaja.pivot_table(index ='Family',columns=['year','month'], values='isBaja',fill_value=0,margins=True,aggfunc=sum).astype('int64')
-            return pivot_isAsset, pivot_isBaja
-    elif nivel.upper() =='PROD':
-        if canal == 1:
-            ass_alta_canal_prod_mes = df[['isAsset']].groupby(by=[df.rfb__c,df.canal_venta,df.Family,df.product_name]).sum()
-            ass_baja_canal_prod_mes = df[['isBaja']].groupby(by=[df.deactivation_date,df.canal_venta,df.Family,df.product_name]).sum()
-            ass_baja_canal_prod_mes.index.names =  ['rfb__c','canal_venta','Family','product_name']
-            altas_bajas = ass_alta_canal_prod_mes.join(ass_baja_canal_prod_mes, how='outer').fillna(0)
-            mes = altas_bajas.groupby(by=[altas_bajas.index.get_level_values('rfb__c').year, altas_bajas.index.get_level_values('rfb__c').month, altas_bajas.index.get_level_values('canal_venta'),altas_bajas.index.get_level_values('Family'),altas_bajas.index.get_level_values('product_name')]).sum()
-            mes.index.names = ['year', 'month', 'canal_venta', 'Family','product_name']
-            isAsset = mes[['isAsset']]
-            isAsset.reset_index(inplace=True)
-            pivot_isAsset = isAsset.pivot_table(index = ['canal_venta','Family','product_name'],columns=['year','month'], values='isAsset',fill_value=0,margins=True,aggfunc=sum).astype('int64')
-            isBaja = mes[['isBaja']]
-            isBaja.reset_index(inplace=True)
-            pivot_isBaja = isBaja.pivot_table(index = ['canal_venta','Family','product_name'],columns=['year','month'], values='isBaja',fill_value=0,margins=True,aggfunc=sum).astype('int64')
-            return pivot_isAsset, pivot_isBaja
-        elif canal == 0:
-            ass_alta_canal_prod_mes = df[['isAsset']].groupby(by=[df.rfb__c,df.Family,df.product_name]).sum()
-            ass_baja_canal_prod_mes = df[['isBaja']].groupby(by=[df.deactivation_date,df.Family,df.product_name]).sum()
-            ass_baja_canal_prod_mes.index.names =  ['rfb__c','Family','product_name']
-            altas_bajas = ass_alta_canal_prod_mes.join(ass_baja_canal_prod_mes, how='outer').fillna(0)
-            mes = altas_bajas.groupby(by=[altas_bajas.index.get_level_values('rfb__c').year, altas_bajas.index.get_level_values('rfb__c').month,altas_bajas.index.get_level_values('Family'),altas_bajas.index.get_level_values('product_name')]).sum()
-            mes.index.names = ['year', 'month', 'Family','product_name']
-            isAsset = mes[['isAsset']]
-            isAsset.reset_index(inplace=True)
-            pivot_isAsset = isAsset.pivot_table(index =['Family','product_name'],columns=['year','month'], values='isAsset',fill_value=0,margins=True,aggfunc=sum).astype('int64')
-            isBaja = mes[['isBaja']]
-            isBaja.reset_index(inplace=True)
-            pivot_isBaja = isBaja.pivot_table(index =['Family','product_name'],columns=['year','month'], values='isBaja',fill_value=0,margins=True,aggfunc=sum).astype('int64')
-            return pivot_isAsset, pivot_isBaja
+def ass_altas_mes(df,tipo=0):
+    idx = pd.period_range('2018-10-01',df.purchase_date__c.max(),freq='M')
+    if tipo == 0:
+        data = df[['isAsset']].groupby(by=[df.rfb__c.dt.to_period("M")]).sum()
+        data.reset_index(inplace=True)
+        data.set_index('rfb__c', inplace=True)
+        pivot = data.reindex(idx).fillna(0).T
+        return pivot
+    elif tipo == 1:
+        data = df[['isAsset']].groupby(by=[df.rfb__c.dt.to_period("M"),df.Family]).sum()
+        data.reset_index(inplace=True)
+        data.set_index('rfb__c', inplace=True)
+        pivot =  data.pivot_table(index='rfb__c', columns='Family', values='isAsset',fill_value=0)
+        pivot = pivot.reindex(idx).fillna(0).T
+        return pivot
+#     elif tipo == 2:
+#         data = df[['isAsset']].groupby(by=[df.rfb__c.dt.to_period("M"),df.canal_venta]).sum()
+#         data.reset_index(inplace=True)
+#         data.set_index('rfb__c', inplace=True)
+#         pivot = data.pivot_table(index='rfb__c', columns='canal_venta', values='isAsset',fill_value=0)
+#         pivot = pivot.reindex(idx).fillna(0).T
+#         return pivot
+    elif tipo == 3:
+        data = df[['isAsset']].groupby(by=[df.rfb__c.dt.to_period("M"),df.canal_venta,df.Family]).sum()
+        data.reset_index(inplace=True)
+        data.set_index('rfb__c', inplace=True)
+        pivot = data.pivot_table(index='rfb__c', columns=['canal_venta','Family'], values='isAsset',fill_value=0)
+        pivot = pivot.reindex(idx).fillna(0).T
+        return pivot
+    elif tipo == 4:
+        data = df[['isAsset']].groupby(by=[df.rfb__c.dt.to_period("M"),df.Family,df.product_name]).sum()
+        data.reset_index(inplace=True)
+        data.set_index('rfb__c', inplace=True)
+        pivot = data.pivot_table(index='rfb__c', columns=['Family','product_name'], values='isAsset',fill_value=0)
+        pivot = pivot.reindex(idx).fillna(0).T
+        return pivot
+    elif tipo == 5:
+        data = df[['isAsset']].groupby(by=[df.rfb__c.dt.to_period("M"),df.canal_venta,df.Family,df.product_name]).sum()
+        data.reset_index(inplace=True)
+        data.set_index('rfb__c', inplace=True)
+        pivot = data.pivot_table(index='rfb__c', columns=['canal_venta','Family','product_name'], values='isAsset',fill_value=0)
+        pivot = pivot.reindex(idx).fillna(0).T
+        return pivot
+
+def ass_bajas_mes(df,tipo=0):
+    idx = pd.period_range('2018-10-01',df.purchase_date__c.max(),freq='M')
+    if tipo == 0:
+        data = df[['isBaja']].groupby(by=[df.deactivation_date.dt.to_period("M")]).sum()
+        data.reset_index(inplace=True)
+        data.set_index('deactivation_date', inplace=True)
+        pivot = data.reindex(idx).fillna(0).T.astype('int64')
+        return pivot
+    elif tipo == 1:
+        data = df[['isBaja']].groupby(by=[df.deactivation_date.dt.to_period("M"),df.Family]).sum()
+        data.reset_index(inplace=True)
+        data.set_index('deactivation_date', inplace=True)
+        pivot =  data.pivot_table(index='deactivation_date', columns='Family', values='isBaja',fill_value=0)
+        pivot = pivot.reindex(idx).fillna(0).T.astype('int64')
+        return pivot
+#     elif tipo == 2:
+#         data = df[['isBaja']].groupby(by=[df.deactivation_date.dt.to_period("M"),df.canal_venta]).sum()
+#         data.reset_index(inplace=True)
+#         data.set_index('deactivation_date', inplace=True)
+#         pivot = data.pivot_table(index='deactivation_date', columns='canal_venta', values='isBaja',fill_value=0)
+#         pivot = pivot.reindex(idx).fillna(0).T
+#         return pivot
+    elif tipo == 3:
+        data = df[['isBaja']].groupby(by=[df.deactivation_date.dt.to_period("M"),df.canal_venta,df.Family]).sum()
+        data.reset_index(inplace=True)
+        data.set_index('deactivation_date', inplace=True)
+        pivot = data.pivot_table(index='deactivation_date', columns=['canal_venta','Family'], values='isBaja',fill_value=0)
+        pivot = pivot.reindex(idx).fillna(0).T.astype('int64')
+        return pivot
+    elif tipo == 4:
+        data = df[['isBaja']].groupby(by=[df.deactivation_date.dt.to_period("M"),df.Family,df.product_name]).sum()
+        data.reset_index(inplace=True)
+        data.set_index('deactivation_date', inplace=True)
+        pivot = data.pivot_table(index='deactivation_date', columns=['Family','product_name'], values='isBaja',fill_value=0)
+        pivot = pivot.reindex(idx).fillna(0).T.astype('int64')
+        return pivot
+    elif tipo == 5:
+        data = df[['isBaja']].groupby(by=[df.deactivation_date.dt.to_period("M"),df.canal_venta,df.Family,df.product_name]).sum()
+        data.reset_index(inplace=True)
+        data.set_index('deactivation_date', inplace=True)
+        pivot = data.pivot_table(index='deactivation_date', columns=['canal_venta','Family','product_name'], values='isBaja',fill_value=0)
+        pivot = pivot.reindex(idx).fillna(0).T.astype('int64')
+        return pivot
 
 
 # -------------- MIGRAS --------------
