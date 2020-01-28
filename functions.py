@@ -4,13 +4,10 @@ import dotenv
 import os
 import psycopg2 as ps
 import numpy as np
-import datetime
 
 dotenv.load_dotenv()
 
 # Mirar si es necesario cerrar la conexion a PS (el cursor)
-def getTimeline(df):
-    return [date.strftime('%m-%Y') for date in pd.date_range(df.purchase_date__c.min(), df.purchase_date__c.max()+ datetime.timedelta(days=30), freq='M')] 
     
 def connectToPs():
     host=os.getenv('HOSTNAME')
@@ -98,7 +95,7 @@ def deactivation(row):
 def getMigrationDate(row):
     return row['date_migration'] if row['tipo_migra'] == 'IN' else row['deactivation_date']
 
-# Correcciones manuales -------------------
+# ----------------------------------- CORRECCIONES MANUALES -------------------
 
 def DRDcorrecciones(row):
     return pd.NaT if row['assetid'] in ['02i0N00000KqDCzQAN','02i0N00000I2qZ2QAJ','02i0N00000I2qZ3QAJ'] else row['deactivation_request_date']
@@ -205,19 +202,24 @@ def base(cur):
 # -------------- VENTAS --------------
 
 # VENTA ASSETS
+
 def ass_vta_fam_mes(df,canal=0):
+    idx = pd.period_range('2018-10-01',df.purchase_date__c.max(),freq='M')
     if canal == 1:
-        ass_vta_canal_fam_mes = df[['isSold']].groupby(by=[df.purchase_date__c.dt.year,df.purchase_date__c.dt.month,df.canal_venta,df.Family]).sum()
-        ass_vta_canal_fam_mes.index.names = ['purchase_year', 'purchase_month', 'canal_venta','Family']
+        ass_vta_canal_fam_mes = df[['isSold']].groupby(by=[df.purchase_date__c.dt.to_period("M"),df.canal_venta,df.Family]).sum()
         ass_vta_canal_fam_mes.reset_index(inplace=True)
-        return ass_vta_canal_fam_mes.pivot_table('isSold',['canal_venta','Family'],['purchase_year','purchase_month'],fill_value=0,margins=True,aggfunc=sum)
+        ass_vta_canal_fam_mes.set_index('purchase_date__c', inplace=True)
+        return ass_vta_canal_fam_mes.pivot_table(index='purchase_date__c', columns=['canal_venta','Family'], values='isSold',fill_value=0).T
     elif canal == 0:
-        ass_vta_fam_mes = df[['isSold']].groupby(by=[df.purchase_date__c.dt.year,df.purchase_date__c.dt.month,df.Family]).sum()
-        ass_vta_fam_mes.index.names = ['purchase_year', 'purchase_month','Family']
+        ass_vta_fam_mes = df[['isSold']].groupby(by=[df.purchase_date__c.dt.to_period("M"),df.Family]).sum()
         ass_vta_fam_mes.reset_index(inplace=True)
-        return ass_vta_fam_mes.pivot_table('isSold','Family',['purchase_year','purchase_month'],fill_value=0,margins=True,aggfunc=sum)
-    else:
-        print('Canal: 0 or 1')
+        ass_vta_fam_mes.set_index('purchase_date__c', inplace=True)
+        return ass_vta_fam_mes.pivot_table(index='purchase_date__c', columns='Family', values='isSold',fill_value=0).T
+    elif canal == 2:
+        ass_vta_fam_mes = df[['isSold']].groupby(by=[df.purchase_date__c.dt.to_period("M")]).sum()
+        ass_vta_fam_mes.reset_index(inplace=True)
+        ass_vta_fam_mes.set_index('purchase_date__c', inplace=True)
+        return ass_vta_fam_mes.T     
 
 def ass_vta_prod_mes(df,canal=0):
     if canal == 1:
@@ -380,9 +382,22 @@ def migBase(cur):
     df['product_name'] = df.apply(lambda row: getProductName(row), axis = 1)
     df['tipo_migra'] = df.segmento.apply(lambda x: 'IN' if x == '3-NOTRIAL' else 'OUT')
     df['date_migration'] = df.apply(lambda row: getMigrationDate(row), axis=1 )
-    df['month_year']= df.date_migration.apply(lambda x: x.strftime('%m-%Y'))
     cols = ['assetid','assethijo_mig','product_name', 'Family' ,'cif', 'canal_venta',
-            'date_migration','tipo_migra','month_year']
+            'date_migration','tipo_migra']
     df = df[cols]
     df.rename(columns={'date_migration':'mig_date'}, inplace = True)
     return df
+
+
+def mig_producto_mes(mig_df):
+    idx = pd.period_range('2018-10-01',mig_df.mig_date.max(),freq='M')
+    group = mig_df[['assetid']].groupby(by=[mig_df.tipo_migra,mig_df.mig_date.dt.to_period("M"),mig_df.canal_venta,mig_df.Family,mig_df.product_name]).count()
+    group.reset_index(inplace=True)
+    group.set_index('mig_date', inplace=True)
+    migin = group[group['tipo_migra']=='IN']
+    pivot_migin = migin.pivot_table(index='mig_date', columns=['canal_venta','Family','product_name'], values='assetid')
+    pivot_migin = pivot_migin.reindex(idx).fillna(0).T
+    migout = group[group['tipo_migra']=='OUT']
+    pivot_migout = migout.pivot_table(index='mig_date', columns=['canal_venta','Family','product_name'], values='assetid')
+    pivot_migout = pivot_migout.reindex(idx).fillna(0).T
+    return pivot_migin,pivot_migout

@@ -162,3 +162,21 @@
 
 
 
+# def getTimeline(df):
+#     return [date.strftime('%d-%m-%Y') for date in pd.date_range(df.purchase_date__c.min(), df.purchase_date__c.max()+ datetime.timedelta(days=30), freq='M')] 
+
+
+
+# def ass_vta_fam_mes(df,canal=0):
+#     if canal == 1:
+#         ass_vta_canal_fam_mes = df[['isSold']].groupby(by=[df.purchase_date__c.dt.year,df.purchase_date__c.dt.month,df.canal_venta,df.Family]).sum()
+#         ass_vta_canal_fam_mes.index.names = ['purchase_year', 'purchase_month', 'canal_venta','Family']
+#         ass_vta_canal_fam_mes.reset_index(inplace=True)
+#         return ass_vta_canal_fam_mes.pivot_table('isSold',['canal_venta','Family'],['purchase_year','purchase_month'],fill_value=0,margins=True,aggfunc=sum)
+#     elif canal == 0:
+#         ass_vta_fam_mes = df[['isSold']].groupby(by=[df.purchase_date__c.dt.year,df.purchase_date__c.dt.month,df.Family]).sum()
+#         ass_vta_fam_mes.index.names = ['purchase_year', 'purchase_month','Family']
+#         ass_vta_fam_mes.reset_index(inplace=True)
+#         return ass_vta_fam_mes.pivot_table('isSold','Family',['purchase_year','purchase_month'],fill_value=0,margins=True,aggfunc=sum)
+#     else:
+#         print('Canal: 0 or 1')
