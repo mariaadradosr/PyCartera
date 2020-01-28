@@ -43,11 +43,11 @@ def main():
 
 
     # BAJAS
-    cli_bajas_mes_0 = functions.cli_bajas_mes(df_bajas,tipo=0).reset_index()
+    cli_bajas_mes_0 = functions.cli_bajas_mes(df_altas,tipo=0).reset_index()
     cli_bajas_mes_0.to_csv('.output/cli_bajas_mes_0.csv',encoding='CP1252',index=False)
     print('Bajas por cliente mensuales TOTAL ........ EXPORTADO')
     
-    cli_bajas_mes_1 = functions.cli_bajas_mes(df_bajas,1).reset_index()
+    cli_bajas_mes_1 = functions.cli_bajas_mes(df_altas,1).reset_index()
     cli_bajas_mes_1.to_csv('.output/cli_bajas_mes_1.csv',encoding='CP1252',index=False)
     print('Bajas por cliente mensuales CANAL ........ EXPORTADO')
 

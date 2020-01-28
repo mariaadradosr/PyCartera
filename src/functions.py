@@ -405,7 +405,7 @@ def cli_altas_mes(df,tipo=3):
     #     data.set_index('rfb__c', inplace=True)
     #     pivot = data.pivot_table(index='rfb__c', columns=['canal_venta','Family','product_name'], values='cif',fill_value=0)
     #     pivot = pivot.reindex(idx).fillna(0).T
-        return pivot
+        # return pivot
 
 def cli_bajas_mes(df,tipo=3):
     df2 = df[df['cif']==1]
