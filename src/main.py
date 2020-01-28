@@ -61,8 +61,9 @@ def main():
 
     # MIGRAS
 
-
-
+    migin, migout = functions.mig_producto_mes(mig_df)
+    migin.to_csv('.output/migin.csv',encoding='CP1252',index=False)
+    migout.to_csv('.output/migout.csv',encoding='CP1252',index=False)
 
 
 
