@@ -36,9 +36,16 @@ def getFamilyFrom(description):
         return 'X MOBILE'
 
 def getVelocityFrom(description):
-    if re.findall('[0-9]{3}|[0-9]{2}', description):
-        return re.findall('[0-9]{3}|[0-9]{2}', description)[0]
-        # return re.findall('[0-9]{3}|[0-9]{2}', description)[0]+' Mbps'
+    if re.search('4G', description):
+        return '4G'
+    elif re.findall('[0-9]{3}|[0-9]{2}|[0-9]{1}', description):
+        if len(re.findall('[0-9]{3}|[0-9]{2}|[0-9]{1}', description)[0]) == 1:
+            print(re.findall('[0-9]{3}|[0-9]{2}|[0-9]{1}', description)[0])
+            return re.findall('[0-9]{3}|[0-9]{2}|[0-9]{1}', description)[0] + 'Gb'
+        elif re.findall('[0-9]{3}|[0-9]{2}|[0-9]{1}', description)[0] == '20':
+            return 'Portable 20'
+        else:
+            return re.findall('[0-9]{3}|[0-9]{2}|[0-9]{1}', description)[0]
     else:
         return ''
 
@@ -48,16 +55,24 @@ def isNeba(description):
     else:
         return 0
 
+def isMonosede(description):
+    if re.search('MONOSEDE', description.upper()) :
+        return 1
+    else:
+        return 0
+
 def getProductName(row):
-    if row['Velocity'] != '' and row['isNeba'] == 0 and row['Family'] != 'X FIBER':
+    if row['isMonosede'] ==1:
+        return row['Family'].title()+' '+'Monosede '+row['Velocity']
+    elif row['Velocity'] != '' and row['isNeba'] == 0 and row['Family'] != 'X FIBER':
         return row['Family'].title()+' '+row['Velocity']
-    if row['Velocity'] != '' and row['isNeba'] == 0 and row['Family'] == 'X FIBER':
+    elif row['Velocity'] != '' and row['isNeba'] == 0 and row['Family'] == 'X FIBER':
         return row['Family'].title()+' '+row['Velocity']+' - '+'own'
-    if row['isNeba'] == 1:
+    elif row['isNeba'] == 1:
         return row['Family'].title()+' '+row['Velocity']+' - '+'neba'
-    if row['Family'] == 'X UCOM':
+    elif row['Family'] == 'X UCOM':
         return 'Teamwork+PBX'
-    if row['Family'] == 'X MOBILE':
+    elif row['Family'] == 'X MOBILE':
         return row['product_name'].title()
     else:
         return 'Assets'
@@ -136,6 +151,7 @@ def detalle(cur):
     df['Family'] = df.product_name.apply(lambda x: getFamilyFrom(x))
     df['Velocity'] = df.product_name.apply(lambda x: getVelocityFrom(x))
     df['isNeba'] = df.product_name.apply(lambda x: isNeba(x))
+    df['isMonosede']= df.product_name.apply(lambda x: isMonosede(x))
     df['product_name_ok'] = df.apply(lambda row: getProductName(row), axis = 1)
     df['cod_postal'] = ''
     df['precio_dto'] = ''
@@ -182,6 +198,7 @@ def base(cur):
     df['Family'] = df.product_name.apply(lambda x: getFamilyFrom(x))
     df['Velocity'] = df.product_name.apply(lambda x: getVelocityFrom(x))
     df['isNeba'] = df.product_name.apply(lambda x: isNeba(x))
+    df['isMonosede']= df.product_name.apply(lambda x: isMonosede(x))
     df['product_name'] = df.apply(lambda row: getProductName(row), axis = 1)
     df['isSold'] = 1
     df['isAsset'] =  df.apply(lambda row: purchaseToAsset(row), axis = 1)
@@ -460,6 +477,7 @@ def migBase(cur):
     df['Family'] = df.product_name.apply(lambda x: getFamilyFrom(x))
     df['Velocity'] = df.product_name.apply(lambda x: getVelocityFrom(x))
     df['isNeba'] = df.product_name.apply(lambda x: isNeba(x))
+    df['isMonosede']= df.product_name.apply(lambda x: isMonosede(x))
     df['product_name'] = df.apply(lambda row: getProductName(row), axis = 1)
     df['tipo_migra'] = df.segmento.apply(lambda x: 'IN' if x == '3-NOTRIAL' else 'OUT')
     df['date_migration'] = df.apply(lambda row: getMigrationDate(row), axis=1 )
