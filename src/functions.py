@@ -18,7 +18,7 @@ def connectToPs():
     conn = ps.connect(host=host, database=database, user=user, password=password)
     print(conn)
     return conn.cursor()
-    
+
 def getProcessDate(cur):
     cur.execute(''' select max(process_date) from cartera_xbo''')
     return pd.DataFrame(cur.fetchall()).iloc[0][0]
@@ -133,7 +133,12 @@ def CDcorrecciones(row):
 
 
 def CanalCorrecciones(row):
-    return 'DHO' if row['cif'] == 'P1817800D' else row['canal_venta']
+    if row['cif'] in ['P1817800D','B71332548']:
+        return 'DHO'
+    if row['cif'] in ['B88280359']:
+        return 'IT integrator'
+    else:
+        return row['canal_venta']
 
 # ----------------------------------- DETALLE --------------------------------
 

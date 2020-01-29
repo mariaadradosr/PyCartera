@@ -6,6 +6,7 @@ import functions
 #     parser.add_argument('--detalle')
 
 
+
 def main():
     cur = functions.connectToPs()
     df = functions.base(cur)
