@@ -159,6 +159,7 @@ def detalle(cur):
         col_names.append(cur.description[e][0])
     df.rename(columns = dict(zip(list(range(33)), col_names)), inplace = True)
     df['canal_venta'] = df.apply(lambda row: CanalCorrecciones(row), axis =1)
+    df['canal_venta'] = df.apply(lambda row: canal(row), axis =1)
     df['Family'] = df.product_name.apply(lambda x: getFamilyFrom(x))
     df['Velocity'] = df.product_name.apply(lambda x: getVelocityFrom(x))
     df['isNeba'] = df.product_name.apply(lambda x: isNeba(x))
