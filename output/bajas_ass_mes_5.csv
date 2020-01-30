@@ -1,0 +1,28 @@
+canal_venta,Family,product_name,2018-10,2018-11,2018-12,2019-01,2019-02,2019-03,2019-04,2019-05,2019-06,2019-07,2019-08,2019-09,2019-10,2019-11,2019-12,2020-01
+DHO,X FIBER,X Fiber 100 - neba,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0
+DHO,X FIBER,X Fiber 100 - own,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0
+DHO,X FIBER,X Fiber 200 - neba,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0
+DHO,X FIBER,X Fiber 200 - own,0,0,0,0,0,0,0,0,0,2,3,0,0,0,0,0
+DHO,X FIBER,X Fiber 50 - neba,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1
+DHO,X FIBER,X Fiber 50 - own,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0
+DHO,X MUSIC,X Music,0,0,0,1,0,1,1,0,0,0,0,0,0,0,0,0
+DHO,X PRIVACY,X Privacy 100,0,0,0,0,0,0,0,0,0,2,0,0,2,0,0,0
+DHO,X PRIVACY,X Privacy 200,0,0,0,0,0,0,0,0,2,0,0,0,3,0,0,0
+DHO,X PRIVACY,X Privacy 50,0,0,0,0,0,0,4,4,0,0,10,2,0,0,0,0
+DHO,X PROTECTION,X Protection,0,0,0,0,0,0,0,2,3,0,1,1,1,2,2,6
+DHO,X SECURITY,X Security 100,0,0,0,0,0,0,0,0,0,2,0,0,0,0,1,0
+DHO,X SECURITY,X Security 200,0,0,0,0,0,0,0,0,0,0,0,0,3,0,2,0
+DHO,X UCOM,Teamwork+PBX,0,0,0,3,1,6,1,1,4,10,5,5,9,4,11,20
+IT integrator,X FIBER,X Fiber 100 - neba,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0
+IT integrator,X FIBER,X Fiber 200 - own,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0
+IT integrator,X MUSIC,X Music,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0
+IT integrator,X PROTECTION,X Protection,0,0,0,0,0,0,1,0,1,0,0,1,0,4,0,0
+IT integrator,X SECURITY,X Security 100,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1
+IT integrator,X UCOM,Teamwork+PBX,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0
+WEB,X FIBER,X Fiber 200 - neba,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0
+WEB,X FIBER,X Fiber 200 - own,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1
+WEB,X FIBER,X Fiber 50 - own,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0
+WEB,X MUSIC,X Music,0,0,1,0,0,0,1,1,0,0,1,0,0,0,0,0
+WEB,X PRIVACY,X Privacy 100,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0
+WEB,X PROTECTION,X Protection,0,0,0,2,0,0,1,1,0,0,0,0,0,7,0,0
+WEB,X UCOM,Teamwork+PBX,0,0,0,0,1,0,0,0,3,1,4,14,5,3,2,0

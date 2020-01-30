@@ -28,61 +28,32 @@ def main():
 
     print('\n')
     # VENTAS
-    cli_vta_mes_0 = functions.cli_vta_mes(df,0).reset_index()
-    cli_vta_mes_0.to_csv('../output/vta_cli_mes_0.csv ',encoding='CP1252',index=False)
-    print('Ventas por cliente mensuales TOTAL ........ OK')
-    
-    cli_vta_mes_2 = functions.cli_vta_mes(df,2).reset_index()
-    cli_vta_mes_2.to_csv('../output/vta_cli_mes_2.csv ',encoding='CP1252',index=False)
-    print('Ventas por cliente mensuales CANAL ........ OK')
-
-    cli_vta_mes_3 = functions.cli_vta_mes(df,3).reset_index()
-    cli_vta_mes_3.to_csv('../output/vta_cli_mes_3.csv ',encoding='CP1252',index=False)
-    print('Ventas por cliente mensuales CANAL + FAM ........ OK')
-
-    ass_vta_mes_5 = functions.ass_vta_mes(df,5).reset_index()
-    ass_vta_mes_5.to_csv('../output/vta_ass_mes_5.csv ',encoding='CP1252',index=False)
-    print('Ventas assets mensuales CANAL + FAM + PRODUCTO ........ OK')
+    ventas_tabla = functions.ventas(df)
+    ventas_tabla.to_csv('../output/ventas_tabla.csv ',encoding='CP1252')
+    print('Tabla ventas ........ OK')
 
     # ALTAS
-    cli_altas_mes_0 = functions.cli_altas_mes_agg(df_altas,tipo=0).reset_index()
-    cli_altas_mes_0.to_csv('../output/altas_cli_mes_0.csv ',encoding='CP1252',index=False)
-    print('Altas por cliente mensuales TOTAL ........ OK')
-    
-    cli_altas_mes_1 = functions.cli_altas_mes_agg(df_altas,1).reset_index()
-    cli_altas_mes_1.to_csv('../output/altas_cli_mes_1.csv ',encoding='CP1252',index=False)
-    print('Altas por cliente mensuales CANAL ........ OK')
-
-    cli_altas_mes_3 = functions.cli_altas_mes(df,3).reset_index()
-    cli_altas_mes_3.to_csv('../output/altas_cli_mes_3.csv ',encoding='CP1252',index=False)
-    print('Altas por cliente mensuales CANAL + FAM ........ OK')
-
-    ass_altas_mes_5 = functions.ass_altas_mes(df,5).reset_index()
-    ass_altas_mes_5.to_csv('../output/altas_ass_mes_5.csv ',encoding='CP1252',index=False)
-    print('Altas assets mensuales CANAL + FAM + PRODUCTO ........ OK')
+    altas_tabla = functions.altas(df,df_altas)
+    altas_tabla.to_csv('../output/altas_tabla.csv ',encoding='CP1252')
+    print('Tabla altas ........ OK')
 
     # BAJAS
-    cli_bajas_mes_0 = functions.cli_bajas_mes_agg(df_altas,tipo=0).reset_index()
-    cli_bajas_mes_0.to_csv('../output/bajas_cli_mes_0.csv ',encoding='CP1252',index=False)
-    print('Bajas por cliente mensuales TOTAL ........ OK')
-    
-    cli_bajas_mes_1 = functions.cli_bajas_mes_agg(df_altas,1).reset_index()
-    cli_bajas_mes_1.to_csv('../output/bajas_cli_mes_1.csv ',encoding='CP1252',index=False)
-    print('Bajas por cliente mensuales CANAL ........ OK')
-
-    cli_bajas_mes_3 = functions.cli_bajas_mes(df,3).reset_index()
-    cli_bajas_mes_3.to_csv('../output/bajas_cli_mes_3.csv ',encoding='CP1252',index=False)
-    print('Bajas por cliente mensuales CANAL + FAM ........ OK')
-
-    ass_bajas_mes_5 = functions.ass_bajas_mes(df,5).reset_index()
-    ass_bajas_mes_5.to_csv('../output/bajas_ass_mes_5.csv ',encoding='CP1252',index=False)
-    print('Bajas assets mensuales CANAL + FAM + PRODUCTO ........ OK')
-
+    bajas_tabla = functions.bajas(df,df_altas)
+    bajas_tabla.to_csv('../output/bajas_tabla.csv ',encoding='CP1252')
+    print('Tabla bajas ........ OK')
     # MIGRAS
 
     migin, migout = functions.mig_producto_mes(mig_df)
+    migin.reset_index(inplace=True)
+    migin['index'] = migin['canal_venta']+'_'+migin['product_name']
+    migin.drop(columns=['canal_venta','Family','product_name'],inplace=True)
+    migin.set_index(['index'],inplace=True)
     migin.to_csv('../output/migin.csv ',encoding='CP1252',index=False)
     print('Migras in mensuales ........ OK')
+    migout.reset_index(inplace=True)
+    migout['index'] = migout['canal_venta']+'_'+migout['product_name']
+    migout.drop(columns=['canal_venta','Family','product_name'],inplace=True)
+    migout.set_index(['index'],inplace=True)
     migout.to_csv('../output/migout.csv ',encoding='CP1252',index=False)
     print('Migras out mensuales ........ OK')
 

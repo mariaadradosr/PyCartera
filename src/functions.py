@@ -159,7 +159,7 @@ def detalle(cur):
         col_names.append(cur.description[e][0])
     df.rename(columns = dict(zip(list(range(33)), col_names)), inplace = True)
     df['canal_venta'] = df.apply(lambda row: CanalCorrecciones(row), axis =1)
-    df['canal_venta'] = df.apply(lambda row: canal(row), axis =1)
+    df['canal_venta'] = df.canal_venta.apply(lambda x: canal(x))
     df['Family'] = df.product_name.apply(lambda x: getFamilyFrom(x))
     df['Velocity'] = df.product_name.apply(lambda x: getVelocityFrom(x))
     df['isNeba'] = df.product_name.apply(lambda x: isNeba(x))
@@ -272,7 +272,7 @@ def ass_vta_mes(df,tipo=0):
         data = df[['isSold']].groupby(by=[df.purchase_date__c.dt.to_period("M"),df.canal_venta,df.Family,df.product_name]).sum()
         data.reset_index(inplace=True)
         data.set_index('purchase_date__c', inplace=True)
-        pivot = data.pivot_table(index='purchase_date__c', columns=['canal_venta','Family','product_name'], values='isSold',fill_value=0)
+        pivot = data.pivot_table(index='purchase_date__c', columns=['canal_venta','product_name'], values='isSold',fill_value=0)
         pivot = pivot.reindex(idx).fillna(0).T
         return pivot
  
@@ -603,3 +603,56 @@ def mig_producto_mes(mig_df):
     pivot_migout = migout.pivot_table(index='mig_date', columns=['canal_venta','Family','product_name'], values='assetid')
     pivot_migout = pivot_migout.reindex(idx).fillna(0).T.astype('int64')
     return pivot_migin,pivot_migout
+
+
+
+# TABLAS SALIDA
+
+def ventas(df):
+    a = cli_vta_mes(df,tipo=0).reset_index()
+    a.set_index(['index'], inplace= True)
+    b = cli_vta_mes(df,tipo=2).reset_index()
+    b.set_index(['canal_venta'], inplace= True)
+    b.index.names = ['index']
+    c=cli_vta_mes(df,3).reset_index()
+    c['index'] = c['canal_venta'] +'_'+c['Family']
+    c.drop(columns=['canal_venta','Family'], inplace=True)
+    c.set_index(['index'],inplace=True)
+    d = ass_vta_mes(df,tipo=5).reset_index()
+    d['index'] = d['canal_venta'] +'_'+d['product_name']
+    d.drop(columns=['canal_venta','product_name'], inplace=True)
+    d.set_index(['index'],inplace=True)
+    return pd.concat([a,b,c,d])
+
+def altas(df,df_altas):
+    a = cli_altas_mes_agg(df_altas,tipo=0).reset_index()
+    a.set_index(['index'], inplace= True)
+    b = cli_altas_mes_agg(df_altas,tipo=1).reset_index()
+    b.set_index(['canal_venta'], inplace= True)
+    b.index.names = ['index']
+    c =cli_altas_mes(df,3).reset_index()
+    c['index'] = c['canal_venta'] +'_'+c['Family']
+    c.drop(columns=['canal_venta','Family'], inplace=True)
+    c.set_index(['index'],inplace=True)
+    d = ass_altas_mes(df,5).reset_index()
+    d['index'] = d['canal_venta'] +'_'+d['product_name']
+    d.drop(columns=['canal_venta','Family','product_name'], inplace=True)
+    d.set_index(['index'],inplace=True)
+    return pd.concat([a,b,c,d])
+
+
+def bajas(df,df_altas):
+    a = cli_bajas_mes_agg(df_altas,tipo=0).reset_index()
+    a.set_index(['index'], inplace= True)
+    b = cli_bajas_mes_agg(df_altas,tipo=1).reset_index()
+    b.set_index(['canal_venta'], inplace= True)
+    b.index.names = ['index']
+    c =cli_bajas_mes(df,3).reset_index()
+    c['index'] = c['canal_venta'] +'_'+c['Family']
+    c.drop(columns=['canal_venta','Family'], inplace=True)
+    c.set_index(['index'],inplace=True)
+    d = ass_bajas_mes(df,5).reset_index()
+    d['index'] = d['canal_venta'] +'_'+d['product_name']
+    d.drop(columns=['canal_venta','Family','product_name'], inplace=True)
+    d.set_index(['index'],inplace=True)
+    return pd.concat([a,b,c,d])
