@@ -26,11 +26,11 @@ def getProcessDate(cur):
 
 def getFamilyFrom(description):
     if re.search('MUSIC', description.upper()):
-        return 'X MUSIC'
+        return 'X MUSIC F'
     elif re.search('PRIVACY', description.upper()):
         return 'X PRIVACY'
     elif re.search('PROTECTION', description.upper()):
-        return 'X PROTECTION'
+        return 'X PROTECTION F'
     elif re.search('FIBER', description.upper()):
         return 'X FIBER'
     elif re.search('SECURITY', description.upper()):
@@ -66,8 +66,10 @@ def isMonosede(description):
         return 0
 
 def getProductName(row):
-    if row['Family'] == 'X MUSIC':
+    if row['Family'] == 'X MUSIC F':
         return 'X Music'
+    if row['Family'] == 'X PROTECTION F':
+        return 'X Protection'
     elif row['isMonosede'] ==1:
         return row['Family'].title()+' '+'Monosede '+row['Velocity']
     elif row['Velocity'] != '' and row['isNeba'] == 0 and row['Family'] != 'X FIBER':
@@ -117,6 +119,14 @@ def getMigrationDate(row):
     return row['date_migration'] if row['tipo_migra'] == 'IN' else row['deactivation_date']
 
 # ----------------------------------- CORRECCIONES MANUALES -------------------
+# def SegmentoCorrecciones(row):
+#     if row['assetid'] == '02i0N00000PfMuWQAV':
+#         return '4-MIGRADO'
+#     elif row['assetid'] == '02i0N00000Pfg96QAB':
+#         return '3-NOTRIAL'
+#     else:
+#         return row['segmento']
+
 
 def DRDcorrecciones(row):
     return pd.NaT if row['assetid'] in ['02i0N00000KqDCzQAN','02i0N00000I2qZ2QAJ','02i0N00000I2qZ3QAJ'] else row['deactivation_request_date']
@@ -198,6 +208,7 @@ def base(cur):
     for e in range(len(cur.description)):
         col_names.append(cur.description[e][0])
     df.rename(columns = dict(zip(list(range(33)), col_names)), inplace = True)
+    df['segmento'] = df.apply(lambda row: SegmentoCorrecciones(row), axis = 1)
     df['cancellation_date'] = df.apply(lambda row: CDcorrecciones(row), axis = 1)
     df['deactivation_request_date'] = df.apply(lambda row: DRDcorrecciones(row), axis = 1)
     df['deactivation_date'] = df.apply(lambda row: DDcorrecciones(row), axis = 1)

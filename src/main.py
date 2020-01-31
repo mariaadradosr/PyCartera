@@ -48,17 +48,17 @@ def main():
     migin['index'] = migin['canal_venta']+'_'+migin['product_name']
     migin.drop(columns=['canal_venta','Family','product_name'],inplace=True)
     migin.set_index(['index'],inplace=True)
-    migin.to_csv('../output/migin.csv ',encoding='CP1252',index=False)
+    migin.to_csv('../output/migin.csv ',encoding='CP1252')
     print('Migras in mensuales ........ OK')
     migout.reset_index(inplace=True)
     migout['index'] = migout['canal_venta']+'_'+migout['product_name']
     migout.drop(columns=['canal_venta','Family','product_name'],inplace=True)
     migout.set_index(['index'],inplace=True)
-    migout.to_csv('../output/migout.csv ',encoding='CP1252',index=False)
+    migout.to_csv('../output/migout.csv ',encoding='CP1252')
     print('Migras out mensuales ........ OK')
 
     # DETALLE CARTERA
-    detalle.to_excel('../output/detalle_cartera.xlsx',encoding='CP1252',index=False)
+    detalle.to_csv('../output/detalle_cartera.csv',encoding='CP1252',index=False)
     print('Detalle cartera ........ OK')
 
 
