@@ -208,7 +208,7 @@ def base(cur):
     for e in range(len(cur.description)):
         col_names.append(cur.description[e][0])
     df.rename(columns = dict(zip(list(range(33)), col_names)), inplace = True)
-    df['segmento'] = df.apply(lambda row: SegmentoCorrecciones(row), axis = 1)
+    # df['segmento'] = df.apply(lambda row: SegmentoCorrecciones(row), axis = 1)
     df['cancellation_date'] = df.apply(lambda row: CDcorrecciones(row), axis = 1)
     df['deactivation_request_date'] = df.apply(lambda row: DRDcorrecciones(row), axis = 1)
     df['deactivation_date'] = df.apply(lambda row: DDcorrecciones(row), axis = 1)
