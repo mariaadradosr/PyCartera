@@ -154,14 +154,16 @@ def CanalCorrecciones(row):
 
 def detalle(cur):
     cur.execute('''
-            select segmento, product_name, companyname, sitename, created_as_trial, purchase_date,
-            cancellation_date, service_date, rfb_date, deactivation_date, canal_venta, partnername,
-            price, cif, assetid, asset_status, migrado, assetpadre_mig, assethijo_mig, rfb_migration,
-            date_migration, purchase_migration
-            from cartera_xbo
-            where process_date = (
-            select max(process_date) from cartera_xbo)
-            and upper(product_name) not like '%CENTRALITA%'
+                select car.segmento, car.product_name, car.companyname, car.sitename, car.created_as_trial, car.purchase_date,
+                car.cancellation_date, car.service_date, car.rfb_date, car.deactivation_date, car.canal_venta, car.partnername,
+                car.price, car.cif, car.assetid, car.asset_status, car.migrado, car.assetpadre_mig, car.assethijo_mig, car.rfb_migration,
+                car.date_migration, car.purchase_migration,cod.cpostal as cod_postal
+                from cartera_xbo car
+                left join assets_codigopostal cod
+                on car.assetid = cod.assetid
+                where process_date = (
+                select max(process_date) from cartera_xbo)
+                and upper(product_name) not like '%CENTRALITA%'
             ''')
     df = pd.DataFrame(cur.fetchall())
     col_names = []
@@ -175,9 +177,7 @@ def detalle(cur):
     df['isNeba'] = df.product_name.apply(lambda x: isNeba(x))
     df['isMonosede']= df.product_name.apply(lambda x: isMonosede(x))
     df['product_name_ok'] = df.apply(lambda row: getProductName(row), axis = 1)
-    df['cod_postal'] = ''
     df['precio_dto'] = ''
-    df['cod_postal'] = ''
     df['%_dto'] = ''
     df['Segmento_Empleados'] = ''
     cols = ['segmento','Family', 'product_name', 'companyname', 'sitename', 'cod_postal',
