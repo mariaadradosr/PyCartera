@@ -5,6 +5,7 @@ import os
 import psycopg2 as ps
 import numpy as np
 import correcciones
+# from src import correcciones
 
 dotenv.load_dotenv()
 
@@ -417,7 +418,7 @@ def cli_bajas_mes_agg(df_altas, tipo=0):
 
 def cli_altas_mes(df, tipo=3):
     df2 = df[df['isAsset'] == 1]
-    idx = pd.period_range('2018-10-01', df2.purchase_date__c.max(), freq='M')
+    idx = pd.period_range('2018-10-01', df.purchase_date__c.max(), freq='M')
     # if tipo == 0:
     #     data = df2[['cif']].groupby(by=[df2.rfb__c.dt.to_period("M")]).nunique()
     #     data.reset_index(inplace=True)
@@ -465,7 +466,7 @@ def cli_altas_mes(df, tipo=3):
 
 def cli_bajas_mes(df, tipo=3):
     df2 = df[df['isBaja'] == 1]
-    idx = pd.period_range('2018-10-01', df2.purchase_date__c.max(), freq='M')
+    idx = pd.period_range('2018-10-01', df.purchase_date__c.max(), freq='M')
     # if tipo == 0:
     #     data = df2[['cif']].groupby(by=[df2.deactivation_date.dt.to_period("M")]).nunique()
     #     data.reset_index(inplace=True)
@@ -655,8 +656,8 @@ def migBase(cur):
     return df
 
 
-def mig_producto_mes(mig_df):
-    idx = pd.period_range('2018-10-01', mig_df.mig_date.max(), freq='M')
+def mig_producto_mes(mig_df,df):
+    idx = pd.period_range('2018-10-01', df.purchase_date__c.max(), freq='M')
     group = mig_df[['assetid']].groupby(by=[mig_df.tipo_migra, mig_df.mig_date.dt.to_period(
         "M"), mig_df.canal_venta, mig_df.Family, mig_df.product_name]).count()
     group.reset_index(inplace=True)
@@ -722,4 +723,4 @@ def bajas(df, df_altas):
     d['index'] = d['canal_venta'] + '_'+d['product_name']
     d.drop(columns=['canal_venta', 'Family', 'product_name'], inplace=True)
     d.set_index(['index'], inplace=True)
-    return pd.concat([a, b, c, d])
+    return pd.concat([a, b, c, d], sort=True)

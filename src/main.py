@@ -43,7 +43,7 @@ def main():
     print('Tabla bajas ........ OK')
     # MIGRAS
 
-    migin, migout = functions.mig_producto_mes(mig_df)
+    migin, migout = functions.mig_producto_mes(mig_df,df)
     migin.reset_index(inplace=True)
     migin['index'] = migin['canal_venta']+'_'+migin['product_name']
     migin.drop(columns=['canal_venta','Family','product_name'],inplace=True)
