@@ -11,7 +11,7 @@ dotenv.load_dotenv()
 
 
 def connectToPs():
-    """Returns cursot to Postgre connection. Hostname, database name, user and password needed"""
+    """Returns cursor to Postgre connection. Hostname, database name, user and password needed"""
     host = os.getenv('HOSTNAME')
     database = os.getenv('NAME')
     user = os.getenv('USER')
