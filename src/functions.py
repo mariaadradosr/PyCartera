@@ -30,7 +30,11 @@ def getProcessDate(cur):
 
 def canal(canal_venta):
     """Standarize canal_venta attribute"""
-    if re.search('DHO', canal_venta.upper()):
+    if canal_venta is None:
+        return 'WEB'
+    elif re.search('DIRECTA', canal_venta.upper()):
+        return 'Venta Directa'
+    elif re.search('DHO', canal_venta.upper()):
         return 'DHO'
     elif re.search('INTEGRA', canal_venta.upper()):
         return 'IT integrator'

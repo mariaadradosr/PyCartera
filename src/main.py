@@ -29,6 +29,8 @@ def main():
     print('Ventas mensuales')
     print(functions.ass_vta_mes(df,0))
     print('\n')
+    print(functions.ass_vta_mes(df,2))
+    print('\n')
     print(functions.ass_vta_mes(df,1))
     print('\n')
     print('Altas cliente mensuales')
@@ -71,6 +73,8 @@ def main():
     # DETALLE CARTERA
     detalle.to_csv(f'{ruta}detalle_cartera.csv',
                    encoding='CP1252', index=False)
+    df_altas.to_csv(f'{ruta}df_altas.csv',
+                encoding='CP1252', index=False)
     print('Detalle cartera ........ OK')
 
 
