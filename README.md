@@ -1,5 +1,14 @@
 # PyCartera
 
+- añadir tarifa
+- precio
+- calcular dto
+
+
+- sofia barat hay que hacer el cambio del assetid que se está pintando billing_details y el real 
+- 
+
+
 ### Main
 ruta = carperta destino
 

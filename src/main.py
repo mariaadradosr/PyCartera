@@ -9,6 +9,7 @@ def main():
     df_altas = functions.base_altas(df)
     mig_df = functions.migBase(cur)
     detalle = functions.detalle(cur)
+    bill_df = functions.billing(cur)
 
     print('\n')
     print('Latest PROCESS DATE: ', (functions.getProcessDate(cur)))
@@ -72,11 +73,15 @@ def main():
 
     # DETALLE CARTERA
     detalle.to_csv(f'{ruta}detalle_cartera.csv',
-                   encoding='CP1252', index=False)
+                   encoding='CP1252', decimal=",",index=False)
     df_altas.to_csv(f'{ruta}df_altas.csv',
                 encoding='CP1252', index=False)
     print('Detalle cartera ........ OK')
 
+    # REVENUES
+    revenue_output = functions.revenue(bill_df)
+    revenue_output.to_csv(f'{ruta}revenues_tabla.csv', decimal=",",encoding='CP1252', index = False)
+    print('Revenues ........ OK')
 
 if __name__ == "__main__":
     main()

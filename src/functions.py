@@ -5,7 +5,7 @@ import os
 import psycopg2 as ps
 import numpy as np
 import correcciones
-# from src import correcciones
+# from src importcd sr correcciones
 
 dotenv.load_dotenv()
 
@@ -41,7 +41,7 @@ def canal(canal_venta):
     elif re.search('WEB', canal_venta.upper()):
         return 'WEB'
 
-# The following functions return different attributes from products description 
+# The following return different attributes from products description 
 # in order to create correct product name afterwards.
 
 def getFamilyFrom(description):
@@ -148,8 +148,8 @@ def getMigrationDate(row):
 def detalle(cur):
     cur.execute('''
                 select car.segmento, car.product_name, car.companyname, car.sitename, car.created_as_trial, car.purchase_date,
-                car.cancellation_date, car.service_date, car.rfb_date, car.deactivation_date, car.canal_venta, car.partnername,
-                car.price, car.cif, car.assetid, car.asset_status, car.migrado, car.assetpadre_mig, car.assethijo_mig, car.rfb_migration,
+                car.cancellation_date, car.service_date, car.rfb_date, car.deactivation_date, car.canal_venta, car.partnername, 
+                car.price as precio, car.cif, car.assetid, car.asset_status, car.migrado, car.assetpadre_mig, car.assethijo_mig, car.rfb_migration,
                 car.date_migration, car.purchase_migration,cod.cpostal as cod_postal
                 from cartera_xbo car
                 left join assets_codigopostal cod
@@ -170,13 +170,13 @@ def detalle(cur):
     df['isNeba'] = df.product_name.apply(lambda x: isNeba(x))
     df['isMonosede'] = df.product_name.apply(lambda x: isMonosede(x))
     df['product_name_ok'] = df.apply(lambda row: getProductName(row), axis=1)
-    df['precio_dto'] = ''
-    df['%_dto'] = ''
+    df['tarifa'] = 0
+    df['%_dto'] = (df['tarifa']-df['precio'])/df['tarifa']
     df['Segmento_Empleados'] = ''
     cols = ['segmento', 'Family', 'product_name', 'companyname', 'sitename', 'cod_postal',
             'created_as_trial', 'purchase_date', 'cancellation_date',
             'service_date', 'rfb_date', 'deactivation_date', 'canal_venta',
-            'partnername', 'price', 'precio_dto', '%_dto', 'cif', 'Segmento_Empleados', 'assetid', 'asset_status', 'migrado',
+            'partnername', 'tarifa', 'precio', '%_dto', 'cif', 'Segmento_Empleados', 'assetid', 'asset_status', 'migrado',
             'assetpadre_mig', 'assethijo_mig', 'rfb_migration', 'date_migration', 'purchase_migration', 'product_name_ok']
     df = df[cols]
     return df
@@ -728,3 +728,41 @@ def bajas(df, df_altas):
     d.drop(columns=['canal_venta', 'Family', 'product_name'], inplace=True)
     d.set_index(['index'], inplace=True)
     return pd.concat([a, b, c, d], sort=True)
+
+
+
+# -------BILLING ------
+def billing(cur):
+    cur.execute('''
+                select bi.assetid, ca.product_name, ca.cif, ca.canal_venta, 
+                substring(bi.dfrom,0,8) as mes, sum(bi.totalamount) as factura 
+                from billing_details bi
+                left join (
+                            select * from cartera_xbo 
+                            where process_date = (
+                                                    select max(process_date) from cartera_xbo)) ca
+                on bi.assetid = ca.assetid
+                group by 1,2,3,4,5
+            ''')
+    df = pd.DataFrame(cur.fetchall())
+    col_names = []
+    for e in range(len(cur.description)):
+        col_names.append(cur.description[e][0])
+    df.rename(columns=dict(zip(list(range(33)), col_names)), inplace=True)
+    df = df[df['cif'].notnull()]
+    df['canal_venta'] = df.apply(lambda row: correcciones.partner(row), axis=1)
+    df['canal_venta'] = df.canal_venta.apply(lambda x: canal(x))
+    df['Family'] = df.product_name.apply(lambda x: getFamilyFrom(x))
+    df['Velocity'] = df.product_name.apply(lambda x: getVelocityFrom(x))
+    df['isNeba'] = df.product_name.apply(lambda x: isNeba(x))
+    df['isMonosede'] = df.product_name.apply(lambda x: isMonosede(x))
+    df['product_name_ok'] = df.apply(lambda row: getProductName(row), axis=1)
+    cols = ['assetid','Family','product_name_ok', 'canal_venta','factura','mes']
+    df = df[cols]
+    return df
+def revenue(bill_df):
+    revenue = bill_df[['factura']].groupby(by=[bill_df.canal_venta,bill_df.product_name_ok,bill_df.mes]).sum().reset_index()
+    revenue['index'] = revenue['canal_venta'] + '_'+revenue['product_name_ok']
+    revenue_pivot = revenue.pivot_table(index='index', columns=['mes'], values = 'factura', aggfunc = 'sum', fill_value = 0).reset_index()
+    revenue_pivot.drop(columns = '2018-09', inplace = True)
+    return revenue_pivot
