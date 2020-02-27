@@ -45,7 +45,7 @@ def main():
     ventas_tabla.to_csv(f'{ruta}ventas_tabla.csv ', encoding='CP1252')
     print('Tabla ventas ........ OK')
 
-    # ALTAS
+    # ALTASgit
     altas_tabla = functions.altas(df, df_altas)
     altas_tabla.to_csv(f'{ruta}altas_tabla.csv ', encoding='CP1252')
     print('Tabla altas ........ OK')
@@ -61,21 +61,21 @@ def main():
     migin['index'] = migin['canal_venta']+'_'+migin['product_name']
     migin.drop(columns=['canal_venta', 'Family', 'product_name'], inplace=True)
     migin.set_index(['index'], inplace=True)
-    migin.to_csv('../output/migin.csv ', encoding='CP1252')
+    migin.to_csv(f'{ruta}migin.csv', encoding='CP1252')
     print('Migras in mensuales ........ OK')
     migout.reset_index(inplace=True)
     migout['index'] = migout['canal_venta']+'_'+migout['product_name']
     migout.drop(columns=['canal_venta', 'Family',
                          'product_name'], inplace=True)
     migout.set_index(['index'], inplace=True)
-    migout.to_csv(f'{ruta}migout.csv ', encoding='CP1252')
+    migout.to_csv(f'{ruta}migout.csv', encoding='CP1252')
     print('Migras out mensuales ........ OK')
 
     # DETALLE CARTERA
     detalle.to_csv(f'{ruta}detalle_cartera.csv',
                    encoding='CP1252', decimal=",",index=False)
-    df_altas.to_csv(f'{ruta}df_altas.csv',
-                encoding='CP1252', index=False)
+    # df_altas.to_csv(f'{ruta}df_altas.csv',
+    #             encoding='CP1252', index=False)
     print('Detalle cartera ........ OK')
 
     # REVENUES

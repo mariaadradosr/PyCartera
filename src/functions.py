@@ -5,10 +5,9 @@ import os
 import psycopg2 as ps
 import numpy as np
 import correcciones
-# from src importcd sr correcciones
+# from src import correcciones
 
 dotenv.load_dotenv()
-
 
 def connectToPs():
     """Returns cursor to Postgre connection. Hostname, database name, user and password needed"""
